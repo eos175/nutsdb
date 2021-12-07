@@ -8,4 +8,5 @@ require (
 	github.com/xujiajun/gorouter v1.2.0
 	github.com/xujiajun/mmap-go v1.0.1
 	github.com/xujiajun/utils v0.0.0-20190123093513-8bf096c4f53b
+	github.com/zeebo/xxh3 v1.0.1
 )

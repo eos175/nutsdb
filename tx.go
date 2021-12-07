@@ -174,7 +174,7 @@ func (tx *Tx) Commit() error {
 		}
 
 		if entry.Meta.Ds == DataStructureBPTree {
-			tx.db.BPTreeKeyEntryPosMap[string(entry.Meta.Bucket)+string(entry.Key)] = tx.db.ActiveFile.writeOff
+			tx.db.BPTreeKeyEntryPosMap[hash(append(entry.Meta.Bucket, entry.Key...))] = tx.db.ActiveFile.writeOff
 		}
 
 		if i == lastIndex {
@@ -506,7 +506,7 @@ func (tx *Tx) rotateActiveFile() error {
 
 		// clear and reset BPTreeKeyEntryPosMap
 		tx.db.BPTreeKeyEntryPosMap = nil
-		tx.db.BPTreeKeyEntryPosMap = make(map[string]int64)
+		tx.db.BPTreeKeyEntryPosMap = make(map[UUID]int64)
 
 		// clear and reset ActiveBPTreeIdx
 		tx.db.ActiveBPTreeIdx = nil

@@ -91,7 +91,7 @@ type (
 		LastAddress      int64
 		Filepath         string
 		bucketSize       uint32
-		keyPosMap        map[string]int64
+		keyPosMap        map[UUID]int64
 		enabledKeyPosMap bool
 	}
 
@@ -152,7 +152,7 @@ func (t *BPTree) newLeaf() *Node {
 
 // NewTree returns a newly initialized BPTree Object that implements the BPTree.
 func NewTree() *BPTree {
-	return &BPTree{LastAddress: 0, keyPosMap: make(map[string]int64), enabledKeyPosMap: false}
+	return &BPTree{LastAddress: 0, keyPosMap: make(map[UUID]int64), enabledKeyPosMap: false}
 }
 
 var queue *Node
@@ -207,7 +207,7 @@ func (t *BPTree) FindLeaf(key []byte) *Node {
 }
 
 // SetKeyPosMap sets the key offset of all entries in the b+ tree.
-func (t *BPTree) SetKeyPosMap(keyPosMap map[string]int64) {
+func (t *BPTree) SetKeyPosMap(keyPosMap map[UUID]int64) {
 	t.keyPosMap = keyPosMap
 }
 
@@ -221,7 +221,7 @@ func (t *BPTree) ToBinary(n *Node) (result []byte, err error) {
 			if len(t.keyPosMap) == 0 {
 				return nil, errors.New("not set keyPosMap")
 			}
-			keys[i] = t.keyPosMap[string(n.Keys[i])]
+			keys[i] = t.keyPosMap[hash(n.Keys[i])]
 		} else {
 			key, _ := strconv2.StrToInt64(string(n.Keys[i]))
 

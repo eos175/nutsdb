@@ -30,6 +30,7 @@ import (
 	"github.com/xujiajun/nutsdb/ds/zset"
 	"github.com/xujiajun/utils/filesystem"
 	"github.com/xujiajun/utils/strconv2"
+	"github.com/zeebo/xxh3"
 )
 
 var (
@@ -127,7 +128,7 @@ type (
 		opt                     Options   // the database options
 		BPTreeIdx               BPTreeIdx // Hint Index
 		BPTreeRootIdxes         []*BPTreeRootIdx
-		BPTreeKeyEntryPosMap    map[string]int64 // key = bucket+key  val = EntryPos
+		BPTreeKeyEntryPosMap    map[UUID]int64 // key = hash(bucket+key)  val = EntryPos
 		bucketMetas             BucketMetasIdx
 		SetIdx                  SetIdx
 		SortedSetIdx            SortedSetIdx
@@ -175,7 +176,7 @@ func Open(opt Options) (*DB, error) {
 		KeyCount:                0,
 		closed:                  false,
 		committedTxIds:          make(map[uint64]struct{}),
-		BPTreeKeyEntryPosMap:    make(map[string]int64),
+		BPTreeKeyEntryPosMap:    make(map[UUID]int64),
 		bucketMetas:             make(map[string]*BucketMeta),
 		ActiveCommittedTxIdsIdx: NewTree(),
 	}
@@ -531,7 +532,7 @@ func (db *DB) parseDataFiles(dataFileIds []int) (unconfirmedRecords []*Record, c
 				})
 
 				if db.opt.EntryIdxMode == HintBPTSparseIdxMode {
-					db.BPTreeKeyEntryPosMap[string(entry.Meta.Bucket)+string(entry.Key)] = off
+					db.BPTreeKeyEntryPosMap[hash(append(entry.Meta.Bucket, entry.Key...))] = off
 				}
 
 				off += entry.Size()
@@ -1033,3 +1034,11 @@ func (db *DB) getRecordFromKey(bucket, key []byte) (record *Record, err error) {
 	}
 	return idx.Find(key)
 }
+
+
+type UUID = xxh3.Uint128
+
+func hash(b []byte) UUID {
+	return xxh3.Hash128(b)
+}
+
